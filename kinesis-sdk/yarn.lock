@@ -902,6 +902,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^18.6.3":
+  version: 18.6.3
+  resolution: "@types/node@npm:18.6.3"
+  checksum: 38495b8fd27200d2b7ab9ccd8c1e2475d2411fba15330f2cba869a85ef79dd42382a2658c8dd298ace8c21ed3bfafcdea408faecd74928b144377d07d00e7c8c
+  languageName: node
+  linkType: hard
+
 "acorn-walk@npm:^8.1.1":
   version: 8.2.0
   resolution: "acorn-walk@npm:8.2.0"
@@ -974,6 +981,7 @@ __metadata:
   resolution: "kinesis-sdk@workspace:."
   dependencies:
     "@aws-sdk/client-kinesis": ^3.142.0
+    "@types/node": ^18.6.3
     dotenv: ^16.0.1
     ts-node: ^10.9.1
     typescript: ^4.7.4
