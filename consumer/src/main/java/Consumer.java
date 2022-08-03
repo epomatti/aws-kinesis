@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.UUID;
 
 import software.amazon.awssdk.regions.Region;
@@ -54,8 +57,6 @@ public class Consumer {
 
   private static class SampleRecordProcessor implements ShardRecordProcessor {
 
-    private static final String SHARD_ID_MDC_KEY = "ShardId";
-
     private String shardId;
 
     public void initialize(InitializationInput initializationInput) {
@@ -69,6 +70,19 @@ public class Consumer {
       processRecordsInput.records()
           .forEach(r -> System.out
               .println(String.format("Processing record pk: %s -- Seq: %s", r.partitionKey(), r.sequenceNumber())));
+
+      /**
+       * Allows termination of app by pressing Enter.
+       */
+      System.out.println("Press enter to shutdown");
+      BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+      try {
+        reader.readLine();
+      } catch (IOException ioex) {
+        ioex.printStackTrace();
+      }
+
+
     }
 
     public void leaseLost(LeaseLostInput leaseLostInput) {

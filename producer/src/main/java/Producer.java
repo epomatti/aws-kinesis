@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
@@ -23,28 +27,23 @@ public class Producer {
 
     ScheduledExecutorService producerExecutor = Executors.newSingleThreadScheduledExecutor();
     producerFuture = producerExecutor.scheduleAtFixedRate(this::publishRecord, 10, 1,
-        TimeUnit.MILLISECONDS);
+        TimeUnit.SECONDS);
 
-    // producerFuture.cancel(true);
-    // producerExecutor.shutdownNow();
+    System.out.println("Producing...");
+    /**
+     * Allows termination of app by pressing Enter.
+     */
+    System.out.println("Press enter to shutdown");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    try {
+      reader.readLine();
+    } catch (IOException ioex) {
+      ioex.printStackTrace();
+    }
 
-    // /**
-    //  * Stops consuming data. Finishes processing the current batch of data already
-    //  * received from Kinesis
-    //  * before shutting down.
-    //  */
-    // Future<Boolean> gracefulShutdownFuture = scheduler.startGracefulShutdown();
-    // log.info("Waiting up to 20 seconds for shutdown to complete.");
-    // try {
-    //   gracefulShutdownFuture.get(20, TimeUnit.SECONDS);
-    // } catch (InterruptedException e) {
-    //   log.info("Interrupted while waiting for graceful shutdown. Continuing.");
-    // } catch (ExecutionException e) {
-    //   log.error("Exception while executing graceful shutdown.", e);
-    // } catch (TimeoutException e) {
-    //   log.error("Timeout while waiting for shutdown.  Scheduler may not have exited.");
-    // }
-    // log.info("Completed, shutting down now.");
+    System.out.println("Shutting down");
+    producerFuture.cancel(true);
+    producerExecutor.shutdownNow();
 
   }
 
