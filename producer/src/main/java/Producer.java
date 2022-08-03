@@ -41,10 +41,8 @@ public class Producer {
       ioex.printStackTrace();
     }
 
-    System.out.println("Shutting down");
     producerFuture.cancel(true);
-    producerExecutor.shutdownNow();
-
+    producerExecutor.shutdownNow();    
   }
 
   private void publishRecord() {

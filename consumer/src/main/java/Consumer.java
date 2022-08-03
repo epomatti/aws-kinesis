@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
@@ -47,6 +49,31 @@ public class Consumer {
     schedulerThread.setDaemon(true);
     schedulerThread.start();
     System.out.println("Started consuming...");
+
+    /**
+     * Allows termination of app by pressing Enter.
+     */
+    System.out.println("Press enter to shutdown");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    try {
+      reader.readLine();
+    } catch (IOException ioex) {
+      ioex.printStackTrace();
+    }
+
+    /**
+     * Stops consuming data. Finishes processing the current batch of data already
+     * received from Kinesis
+     * before shutting down.
+     */
+    Future<Boolean> gracefulShutdownFuture = scheduler.startGracefulShutdown();
+    System.out.println("Waiting up to 20 seconds for shutdown to complete.");
+    try {
+      gracefulShutdownFuture.get(20, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 
   private static class SampleRecordProcessorFactory implements ShardRecordProcessorFactory {
@@ -70,19 +97,6 @@ public class Consumer {
       processRecordsInput.records()
           .forEach(r -> System.out
               .println(String.format("Processing record pk: %s -- Seq: %s", r.partitionKey(), r.sequenceNumber())));
-
-      /**
-       * Allows termination of app by pressing Enter.
-       */
-      System.out.println("Press enter to shutdown");
-      BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-      try {
-        reader.readLine();
-      } catch (IOException ioex) {
-        ioex.printStackTrace();
-      }
-
-
     }
 
     public void leaseLost(LeaseLostInput leaseLostInput) {
