@@ -3,8 +3,9 @@
   "packageManager": "yarn@3.2.2",
   "scripts": {
     "build": "tsc",
-    "produce": "npx ts-node --esm src/produce.ts",
-    "consume": "npx ts-node --esm src/consume.ts"
+    "put": "npx ts-node --esm src/put.ts",
+    "get": "npx ts-node --esm src/get.ts",
+    "listShards": "npx ts-node --esm src/listShards.ts"
   },
   "dependencies": {
     "@aws-sdk/client-kinesis": "^3.142.0",
