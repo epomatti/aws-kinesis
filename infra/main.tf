@@ -77,6 +77,13 @@ resource "aws_s3_bucket_public_access_block" "app" {
   restrict_public_buckets = true
 }
 
+### Firehose ###
+
+resource "aws_cloudwatch_log_stream" "firehose" {
+  name           = "firehose"
+  log_group_name = aws_cloudwatch_log_group.default.name
+}
+
 resource "aws_iam_role" "firehose" {
   name = "assume-role-firehose"
 
@@ -95,72 +102,46 @@ resource "aws_iam_role" "firehose" {
   })
 }
 
-### Firehose ###
+module "firehose_s3_policy" {
+  source = "./firehose_s3_policy"
 
-resource "aws_cloudwatch_log_stream" "firehose" {
-  name           = "firehose"
-  log_group_name = aws_cloudwatch_log_group.default.name
+  region          = local.region
+  account_id      = var.account_id
+  bucket_name     = aws_s3_bucket.bucket.bucket
+  stream_name     = aws_kinesis_stream.default.name
+  kinesis_key_id  = var.kinesis_key_id
+  log_group_name  = aws_cloudwatch_log_group.default.name
+  log_stream_name = aws_cloudwatch_log_stream.firehose.name
 }
 
-# module "firehose_s3_permissions" {
-#   source = "./firehose_s3_policy"
+resource "aws_iam_role_policy_attachment" "firehose_s3_attach" {
+  role       = aws_iam_role.firehose.name
+  policy_arn = module.firehose_s3_policy.arn
+}
 
-#   region          = local.region
-#   account_id      = var.account_id
-#   bucket_name     = aws_s3_bucket.bucket.bucket
-#   stream_name     = aws_kinesis_stream.default.name
-#   kinesis_key_id  = var.kinesis_key_id
-#   log_group_name  = aws_cloudwatch_log_group.default.name
-#   log_stream_name = aws_cloudwatch_log_stream.firehose.name
-# }
+resource "aws_cloudwatch_log_stream" "firehose_s3" {
+  name           = "firehose_s3"
+  log_group_name = aws_cloudwatch_log_group.default.name
+}
 
 resource "aws_kinesis_firehose_delivery_stream" "stream" {
   name        = "kds-s3"
   destination = "extended_s3"
 
-  # kinesis_source_configuration {
-  #   kinesis_stream_arn = aws_kinesis_stream.default.arn
-  #   role_arn           = aws_iam_role.firehose.arn
-  # }
+  kinesis_source_configuration {
+    kinesis_stream_arn = aws_kinesis_stream.default.arn
+    role_arn           = aws_iam_role.firehose.arn
+  }
 
   extended_s3_configuration {
     bucket_arn = aws_s3_bucket.bucket.arn
     role_arn   = aws_iam_role.firehose.arn
+
+    cloudwatch_logging_options {
+      enabled         = true
+      log_group_name  = aws_cloudwatch_log_group.default.name
+      log_stream_name = aws_cloudwatch_log_stream.firehose_s3.name
+    }
   }
+
 }
-
-### Firehose from Kinesis Data Stream source ###
-# resource "aws_kinesis_firehose_delivery_stream" "data_stream" {
-#   name        = "from_data_stream"
-#   destination = "extended_s3"
-
-#   kinesis_source_configuration {
-#     kinesis_stream_arn = aws_kinesis_stream.default.arn
-#   }
-
-#   extended_s3_configuration {
-#     role_arn   = aws_iam_role.default.arn
-#     bucket_arn = aws_s3_bucket.bucket.arn
-#   }
-
-#   // TODO: Add Role
-# }
-
-# resource "aws_kinesis_analytics_application" "test_application" {
-#   name = "kinesis-analytics-application-test"
-
-#   inputs {
-#     name_prefix = "test_prefix"
-
-#     kinesis_stream {
-#       resource_arn = aws_kinesis_stream.default.arn
-
-#       // TODO: Add role
-#       # role_arn     = aws_iam_role.test.arn
-#     }
-
-#     parallelism {
-#       count = 1
-#     }
-#   }
-# }
