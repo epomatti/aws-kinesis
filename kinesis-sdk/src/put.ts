@@ -1,4 +1,9 @@
-import { AddTagsToStreamCommand, AddTagsToStreamCommandInput, GetRecordsCommand, GetRecordsCommandInput, GetShardIteratorCommand, GetShardIteratorCommandInput, KinesisClient, ListShardsCommand, PutRecordsCommand, PutRecordsCommandInput, PutRecordsRequestEntry } from "@aws-sdk/client-kinesis";
+import {
+  KinesisClient,
+  PutRecordsCommand,
+  PutRecordsCommandInput,
+  PutRecordsRequestEntry
+} from "@aws-sdk/client-kinesis";
 
 (async () => {
 
