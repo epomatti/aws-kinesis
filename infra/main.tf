@@ -11,19 +11,36 @@ terraform {
 }
 
 provider "aws" {
+  region = local.region
+}
+
+### Variables ###
+
+variable "account_id" {
+  type = number
+}
+
+variable "kinesis_key_id" {
+  type = string
+}
+
+locals {
   region = "sa-east-1"
+}
+
+
+### Cloud Watch ###
+resource "aws_cloudwatch_log_group" "default" {
+  name = "kinesis"
 }
 
 ### Kinesis Data Stream ###
 
 resource "aws_kinesis_stream" "default" {
-  name        = "device-datastream"
+  name        = "device-stream"
   shard_count = 1
 
-  # Retention hours
-  // Minimum: 24
-  // Extended: 7 days
-  // Long-term: 356 days
+  # Retention (in hours)
   retention_period = 24
 
   # Encryption
@@ -38,51 +55,79 @@ resource "aws_kinesis_stream" "default" {
   stream_mode_details {
     stream_mode = "PROVISIONED"
   }
-
 }
 
 ### S3 ###
 
-# resource "aws_iam_role" "default" {
-#   name = "test-firehose"
+resource "aws_s3_bucket" "bucket" {
+  bucket = "bucket-kinesis-data-stream-817234"
+}
 
-#   assume_role_policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": "sts:AssumeRole",
-#       "Principal": {
-#         "Service": "firehose.amazonaws.com"
-#       },
-#       "Effect": "Allow",
-#       "Sid": ""
-#     }
-#   ]
+resource "aws_s3_bucket_acl" "default" {
+  bucket = aws_s3_bucket.bucket.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_public_access_block" "app" {
+  bucket = aws_s3_bucket.bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_iam_role" "firehose" {
+  name = "assume-role-firehose"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowFirehose"
+        Effect = "Allow"
+        Action = "sts:AssumeRole"
+        Principal = {
+          Service = "firehose.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+### Firehose ###
+
+resource "aws_cloudwatch_log_stream" "firehose" {
+  name           = "firehose"
+  log_group_name = aws_cloudwatch_log_group.default.name
+}
+
+# module "firehose_s3_permissions" {
+#   source = "./firehose_s3_policy"
+
+#   region          = local.region
+#   account_id      = var.account_id
+#   bucket_name     = aws_s3_bucket.bucket.bucket
+#   stream_name     = aws_kinesis_stream.default.name
+#   kinesis_key_id  = var.kinesis_key_id
+#   log_group_name  = aws_cloudwatch_log_group.default.name
+#   log_stream_name = aws_cloudwatch_log_stream.firehose.name
 # }
-# EOF
-# }
 
-# resource "aws_s3_bucket" "bucket" {
-#   bucket = "bucket-kinesis-data-stream-999"
-# }
+resource "aws_kinesis_firehose_delivery_stream" "stream" {
+  name        = "kds-s3"
+  destination = "extended_s3"
 
-# resource "aws_s3_bucket_acl" "default" {
-#   bucket = aws_s3_bucket.bucket.id
-#   acl    = "private"
-# }
+  # kinesis_source_configuration {
+  #   kinesis_stream_arn = aws_kinesis_stream.default.arn
+  #   role_arn           = aws_iam_role.firehose.arn
+  # }
 
-
-### Firehose from put source ###
-# resource "aws_kinesis_firehose_delivery_stream" "put_stream" {
-#   name        = "terraform-kinesis-firehose-extended-s3-test-stream"
-#   destination = "extended_s3"
-
-#   extended_s3_configuration {
-#     role_arn   = aws_iam_role.default.arn
-#     bucket_arn = aws_s3_bucket.bucket.arn
-#   }
-# }
+  extended_s3_configuration {
+    bucket_arn = aws_s3_bucket.bucket.arn
+    role_arn   = aws_iam_role.firehose.arn
+  }
+}
 
 ### Firehose from Kinesis Data Stream source ###
 # resource "aws_kinesis_firehose_delivery_stream" "data_stream" {
