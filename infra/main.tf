@@ -61,6 +61,7 @@ resource "aws_kinesis_stream" "default" {
 
 resource "aws_s3_bucket" "bucket" {
   bucket = "bucket-kinesis-data-stream-817234"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_acl" "default" {
