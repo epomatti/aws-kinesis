@@ -1,19 +1,55 @@
-import { AddTagsToStreamCommand, AddTagsToStreamCommandInput, KinesisClient } from "@aws-sdk/client-kinesis";
+import { AddTagsToStreamCommand, AddTagsToStreamCommandInput, GetRecordsCommand, GetRecordsCommandInput, GetShardIteratorCommand, GetShardIteratorCommandInput, KinesisClient, ListShardsCommand } from "@aws-sdk/client-kinesis";
 
-const client = new KinesisClient({ region: "sa-east-1" });
+(async () => {
 
-const records: Record<string, string> = {
-  one: "one",
-  two: "two",
-  three: "three",
-};
+  const DATA_STREAM = "device-datastream";
+  const SHARD_ID = "shardId-000000000000";
 
-const params: AddTagsToStreamCommandInput = {
-  StreamName: "device-datastream",
-  Tags: records
-};
-const command = new AddTagsToStreamCommand(params);
+  const client = new KinesisClient({ region: "sa-east-1" });
 
-const data = await client.send(command);
 
-console.log(data);
+  // // Add Tags
+  // const records: Record<string, string> = {
+  //   one: "one",
+  //   two: "two",
+  //   three: "three",
+  // };
+
+  // const params: AddTagsToStreamCommandInput = {
+  //   StreamName: DATA_STREAM,
+  //   Tags: records
+  // };
+
+  // const command = new AddTagsToStreamCommand(params);
+  // const data = await client.send(command);
+
+
+  // // List Shards
+  // const paramsList = {
+  //   StreamName: "device-datastream"
+  // };
+  // const commandList = new ListShardsCommand(paramsList);
+  // const shardData = await client.send(commandList);
+
+  // console.log(shardData);
+
+
+  // Get Records
+
+  const paramsShardIterator: GetShardIteratorCommandInput = {
+    StreamName: DATA_STREAM,
+    ShardId: SHARD_ID,
+    ShardIteratorType: "TRIM_HORIZON"
+  };
+  const commandShardIterator = new GetShardIteratorCommand(paramsShardIterator);
+
+  const shardIteratorData = await client.send(commandShardIterator);
+  const paramsGet: GetRecordsCommandInput = {
+    ShardIterator: shardIteratorData.ShardIterator,    
+  };
+  const commandGet = new GetRecordsCommand(paramsGet);
+  const response = await client.send(commandGet);
+
+  console.log(response.Records);
+
+})();
