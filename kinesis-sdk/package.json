@@ -5,7 +5,7 @@
     "build": "tsc",
     "put": "npx ts-node --esm src/put.ts",
     "get": "npx ts-node --esm src/get.ts",
-    "listShards": "npx ts-node --esm src/listShards.ts"
+    "list-shards": "npx ts-node --esm src/listShards.ts"
   },
   "dependencies": {
     "@aws-sdk/client-kinesis": "^3.142.0",

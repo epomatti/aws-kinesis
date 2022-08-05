@@ -162,5 +162,4 @@ resource "aws_kinesis_firehose_delivery_stream" "stream" {
       log_stream_name = aws_cloudwatch_log_stream.firehose_s3.name
     }
   }
-
 }
