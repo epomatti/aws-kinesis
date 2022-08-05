@@ -27,7 +27,7 @@ yarn run put
 yarn run sub
 ```
 
-### Kinesis Client Library (KCL)
+#### Kinesis Client Library (KCL)
 
 An example of KCL is also available.
 
