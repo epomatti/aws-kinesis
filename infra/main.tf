@@ -60,7 +60,7 @@ resource "aws_kinesis_stream" "default" {
 ### S3 ###
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "bucket-kinesis-data-stream-817234"
+  bucket        = "bucket-kinesis-data-stream-817234"
   force_destroy = true
 }
 
@@ -103,6 +103,10 @@ resource "aws_iam_role" "firehose" {
   })
 }
 
+module "lambda" {
+  source = "./lambda"
+}
+
 module "firehose_s3_policy" {
   source = "./firehose_s3_policy"
 
@@ -113,6 +117,7 @@ module "firehose_s3_policy" {
   kinesis_key_id  = var.kinesis_key_id
   log_group_name  = aws_cloudwatch_log_group.default.name
   log_stream_name = aws_cloudwatch_log_stream.firehose.name
+  function_name   = module.lambda.function_name
 }
 
 resource "aws_iam_role_policy_attachment" "firehose_s3_attach" {

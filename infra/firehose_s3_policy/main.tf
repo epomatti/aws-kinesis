@@ -26,6 +26,10 @@ variable "log_stream_name" {
   type = string
 }
 
+variable "function_name" {
+  type = string
+}
+
 resource "aws_iam_policy" "policy" {
   name        = "FirehoseS3"
   description = "Allow various permissions for Kinesis Firehose with S3 destination."
@@ -85,16 +89,16 @@ resource "aws_iam_policy" "policy" {
           "arn:aws:logs::${var.region}:${var.account_id}:log-group:${var.log_group_name}:log-stream:${var.log_stream_name}"
         ]
       },
-      # {
-      #   Effect = "Allow"
-      #   Action = [
-      #     "lambda:InvokeFunction",
-      #     "lambda:GetFunctionConfiguration"
-      #   ],
-      #   Resource = [
-      #     "arn:aws:lambda:region:account-id:function:function-name:function-version"
-      #   ]
-      # }
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction",
+          "lambda:GetFunctionConfiguration"
+        ],
+        Resource = [
+          "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.function_name}:latest"
+        ]
+      }
     ]
   })
 }
