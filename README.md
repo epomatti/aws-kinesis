@@ -19,13 +19,15 @@ Install the dependencies:
 yarn install
 ```
 
-Run the taks:
+Run the tasks:
 
 ```sh
 yarn run get
 yarn run put
 yarn run sub
 ```
+
+Check `package.json` for more commands.
 
 #### Kinesis Client Library (KCL)
 
