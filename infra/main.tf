@@ -143,6 +143,19 @@ resource "aws_kinesis_firehose_delivery_stream" "stream" {
     bucket_arn = aws_s3_bucket.bucket.arn
     role_arn   = aws_iam_role.firehose.arn
 
+    processing_configuration {
+      enabled = "true"
+
+      processors {
+        type = "Lambda"
+
+        parameters {
+          parameter_name  = "LambdaArn"
+          parameter_value = "${module.lambda.arn}:$LATEST"
+        }
+      }
+    }
+
     cloudwatch_logging_options {
       enabled         = true
       log_group_name  = aws_cloudwatch_log_group.default.name

@@ -96,7 +96,7 @@ resource "aws_iam_policy" "policy" {
           "lambda:GetFunctionConfiguration"
         ],
         Resource = [
-          "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.function_name}:latest"
+          "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.function_name}:$LATEST"
         ]
       }
     ]
