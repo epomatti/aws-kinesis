@@ -3,8 +3,10 @@
   "packageManager": "yarn@3.2.2",
   "scripts": {
     "build": "tsc",
+    "add-tags": "npx ts-node --esm src/addTags.ts",
     "put": "npx ts-node --esm src/put.ts",
     "get": "npx ts-node --esm src/get.ts",
+    "sub": "npx ts-node --esm src/subscribe.ts",
     "list-shards": "npx ts-node --esm src/listShards.ts"
   },
   "dependencies": {
