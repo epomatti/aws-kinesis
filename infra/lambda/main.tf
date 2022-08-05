@@ -25,7 +25,7 @@ resource "aws_lambda_function" "json_transform" {
   filename      = "${path.module}/csv2json.zip"
   function_name = "kinesis-s3-json-transform"
   role          = aws_iam_role.iam_for_lambda.arn
-  handler       = "index.lambdaHandler"
+  handler       = "hello-world/app.lambdaHandler"
   runtime       = "nodejs16.x"
 }
 
