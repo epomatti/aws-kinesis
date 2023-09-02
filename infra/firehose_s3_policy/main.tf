@@ -1,35 +1,3 @@
-variable "region" {
-  type = string
-}
-
-variable "account_id" {
-  type = number
-}
-
-variable "bucket_name" {
-  type = string
-}
-
-variable "stream_name" {
-  type = string
-}
-
-variable "kinesis_key_id" {
-  type = string
-}
-
-variable "log_group_name" {
-  type = string
-}
-
-variable "log_stream_name" {
-  type = string
-}
-
-variable "function_name" {
-  type = string
-}
-
 resource "aws_iam_policy" "policy" {
   name        = "FirehoseS3"
   description = "Allow various permissions for Kinesis Firehose with S3 destination."
@@ -60,7 +28,7 @@ resource "aws_iam_policy" "policy" {
           "kinesis:GetRecords",
           "kinesis:ListShards"
         ]
-        Resource = "arn:aws:kinesis:${var.region}:${var.account_id}:stream/${var.stream_name}"
+        Resource = "arn:aws:kinesis:${var.aws_region}:${var.aws_account_id}:stream/${var.stream_name}"
       },
       {
         Effect = "Allow"
@@ -69,11 +37,11 @@ resource "aws_iam_policy" "policy" {
           "kms:GenerateDataKey"
         ]
         Resource = [
-          "arn:aws:kms:${var.region}:${var.account_id}:key/${var.kinesis_key_id}"
+          "arn:aws:kms:${var.aws_region}:${var.aws_account_id}:key/*"
         ]
         Condition = {
           StringEquals = {
-            "kms:ViaService" : "s3.${var.region}.amazonaws.com"
+            "kms:ViaService" : "s3.${var.aws_region}.amazonaws.com"
           }
           StringLike = {
             "kms:EncryptionContext:aws:s3:arn" : "arn:aws:s3:::${var.bucket_name}/prefix*"
@@ -86,7 +54,7 @@ resource "aws_iam_policy" "policy" {
           "logs:PutLogEvents"
         ]
         Resource = [
-          "arn:aws:logs::${var.region}:${var.account_id}:log-group:${var.log_group_name}:log-stream:${var.log_stream_name}"
+          "arn:aws:logs::${var.aws_region}:${var.aws_account_id}:log-group:${var.log_group_name}:log-stream:${var.log_stream_name}"
         ]
       },
       {
@@ -96,7 +64,7 @@ resource "aws_iam_policy" "policy" {
           "lambda:GetFunctionConfiguration"
         ],
         Resource = [
-          "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.function_name}:$LATEST"
+          "arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:${var.function_name}:$LATEST"
         ]
       }
     ]

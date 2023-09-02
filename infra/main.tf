@@ -1,8 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.24.0"
+      source = "hashicorp/aws"
     }
   }
   backend "local" {
@@ -10,24 +9,16 @@ terraform {
   }
 }
 
+
 provider "aws" {
-  region = local.region
+  region = var.aws_region
 }
 
-### Variables ###
-
-variable "account_id" {
-  type = number
-}
-
-variable "kinesis_key_id" {
-  type = string
-}
+data "aws_caller_identity" "current" {}
 
 locals {
-  region = "sa-east-1"
+  aws_account_id = data.aws_caller_identity.current.account_id
 }
-
 
 ### Cloud Watch ###
 resource "aws_cloudwatch_log_group" "default" {
@@ -35,7 +26,6 @@ resource "aws_cloudwatch_log_group" "default" {
 }
 
 ### Kinesis Data Stream ###
-
 resource "aws_kinesis_stream" "default" {
   name        = "device-stream"
   shard_count = 1
@@ -58,28 +48,12 @@ resource "aws_kinesis_stream" "default" {
 }
 
 ### S3 ###
-
 resource "aws_s3_bucket" "bucket" {
   bucket        = "bucket-kinesis-data-stream-817234"
   force_destroy = true
 }
 
-resource "aws_s3_bucket_acl" "default" {
-  bucket = aws_s3_bucket.bucket.id
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_public_access_block" "app" {
-  bucket = aws_s3_bucket.bucket.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
 ### Firehose ###
-
 resource "aws_cloudwatch_log_stream" "firehose" {
   name           = "firehose"
   log_group_name = aws_cloudwatch_log_group.default.name
@@ -110,11 +84,10 @@ module "lambda" {
 module "firehose_s3_policy" {
   source = "./firehose_s3_policy"
 
-  region          = local.region
-  account_id      = var.account_id
+  aws_region      = var.aws_region
+  aws_account_id  = local.aws_account_id
   bucket_name     = aws_s3_bucket.bucket.bucket
   stream_name     = aws_kinesis_stream.default.name
-  kinesis_key_id  = var.kinesis_key_id
   log_group_name  = aws_cloudwatch_log_group.default.name
   log_stream_name = aws_cloudwatch_log_stream.firehose.name
   function_name   = module.lambda.function_name
@@ -163,3 +136,10 @@ resource "aws_kinesis_firehose_delivery_stream" "stream" {
     }
   }
 }
+
+### New Code ###
+
+module "firehose_direct_put" {
+  source = "./firehose-put"
+}
+

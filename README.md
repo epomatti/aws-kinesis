@@ -1,6 +1,6 @@
 # AWS Kinesis
 
-AWS Kinesis services in action.
+AWS Kinesis services architecture.
 
 <img src=".diagram/kinesis.drawio.png" width=700 />
 
@@ -29,7 +29,7 @@ yarn run sub
 
 Check `package.json` for more commands.
 
-#### Kinesis Client Library (KCL)
+### Kinesis Client Library (KCL)
 
 An example of KCL is also available.
 
@@ -38,7 +38,13 @@ mvn install
 mvn compile
 ```
 
+Run the Java program:
+
 ```sh
 mvn exec:java -pl consumer
 mvn exec:java -pl producer
 ```
+
+### Firehose PUT
+
+
