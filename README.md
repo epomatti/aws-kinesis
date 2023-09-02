@@ -47,4 +47,6 @@ mvn exec:java -pl producer
 
 ### Firehose PUT
 
+Run the `go-put` app to send data directly to Firehose.
+
 
