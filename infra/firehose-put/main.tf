@@ -1,11 +1,7 @@
 resource "aws_s3_bucket" "bucket" {
-  bucket = "tf-firehose-put-s3-1238safdas"
+  bucket        = "tf-firehose-put-s3-1238safdas"
+  force_destroy = true
 }
-
-# resource "aws_s3_bucket_acl" "bucket_acl" {
-#   bucket = aws_s3_bucket.bucket.id
-#   acl    = "private"
-# }
 
 resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
   name        = "PUT-S3-QJVm9DFX"

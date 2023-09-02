@@ -1,12 +1,12 @@
 # AWS Kinesis
 
-AWS Kinesis services architecture. The main project will work with most of the components in an fully-integrated scenario.
+AWS Kinesis services architecture demonstrating real-time and near real-time streams. The main project will work with most of the components in an fully-integrated scenario.
 
-<img src=".diagram/kinesis.drawio.png" width=700 />
+<img src=".diagram/kinesis.drawio.png" width=750 />
 
 Additionally, a small Go client will send data directly to a Firehose `PutRecord` endpoint:
 
-<img src=".diagram/go.png" width=700 />
+<img src=".diagram/go.png" width=500 />
 
 ## Running
 
