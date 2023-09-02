@@ -1,8 +1,12 @@
 # AWS Kinesis
 
-AWS Kinesis services architecture.
+AWS Kinesis services architecture. The main project will work with most of the components in an fully-integrated scenario.
 
 <img src=".diagram/kinesis.drawio.png" width=700 />
+
+Additionally, a small Go client will send data directly to a Firehose `PutRecord` endpoint:
+
+<img src=".diagram/go.png" width=700 />
 
 ## Running
 
@@ -45,8 +49,19 @@ mvn exec:java -pl consumer
 mvn exec:java -pl producer
 ```
 
-### Firehose PUT
+### Firehose direct `PutRecord`
 
 Run the `go-put` app to send data directly to Firehose.
 
+Create the `.env` file:
 
+```sh
+DELIVERY_STREAM_NAME="PUT-S3-XYZ"
+```
+
+Run the application to send sample data directly to the `PutRecord` action:
+
+```
+go get
+go run .
+```

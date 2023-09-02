@@ -11,10 +11,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func init() {
 	err := godotenv.Load()
 	utils.Check(err)
+}
 
+func main() {
 	stream := os.Getenv("DELIVERY_STREAM_NAME")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
